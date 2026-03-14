@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Uber - Debug</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Calculadora de Uber</h1>
+    
+    <form id="fareForm" onsubmit="event.preventDefault(); calcularTarifa();">
+        <!-- O onsubmit é uma alternativa direta, mas vamos usar JS puro -->
+        <div>
+            <label for="distance">Distância (km):</label>
+            <input type="number" id="distance" step="0.1" min="0" placeholder="Ex: 12.5" required>
+        </div>
+        <div>
+            <label for="time">Tempo (minutos):</label>
+            <input type="number" id="time" step="0.1" min="0" placeholder="Ex: 15" required>
+        </div>
+        <button type="submit">Calcular Tarifa</button>
+    </form>
+
+    <h2 id="result"></h2>
+
+    <script>
+        // Função principal destacada para facilitar chamada direta
+        function calcularTarifa() {
+            console.log('Função calcularTarifa chamada');
+
+            const distanceInput = document.getElementById('distance');
+            const timeInput = document.getElementById('time');
+            const resultElement = document.getElementById('result');
+
+            // Verifica se os elementos existem
+            if (!distanceInput || !timeInput || !resultElement) {
+                console.error('Elementos não encontrados');
+                return;
+            }
+
+            const distance = parseFloat(distanceInput.value);
+            const time = parseFloat(timeInput.value);
+
+            console.log('Distância:', distance, 'Tempo:', time);
+
+            // Validação
+            if (isNaN(distance) || isNaN(time)) {
+                resultElement.textContent = 'Por favor, preencha ambos os campos com números.';
+                return;
+            }
+            if (distance < 0 || time < 0) {
+                resultElement.textContent = 'Os valores não podem ser negativos.';
+                return;
+            }
+
+            // Constantes
+            const PRICE_PER_KM = 2.0;
+            const PRICE_PER_MINUTE = 0.5;
+            const MINIMUM_FARE = 5.0;
+
+            // Cálculo da tarifa total
+            let fare = (distance * PRICE_PER_KM) + (time * PRICE_PER_MINUTE);
+            if (fare < MINIMUM_FARE) {
+                fare = MINIMUM_FARE;
+            }
+
+            // Cálculo do valor por km
+            let perKm = null;
+            if (distance > 0) {
+                perKm = fare / distance;
+            }
+
+            // Exibição
+            let resultText = `Tarifa total: R$ ${fare.toFixed(2)}`;
+            if (perKm !== null) {
+                resultText += ` | Valor por km: R$ ${perKm.toFixed(2)}`;
+            } else {
+                resultText += ` | Valor por km: N/A (distância zero)`;
+            }
+
+            resultElement.textContent = resultText;
+            console.log('Resultado exibido:', resultText);
+        }
+
+        // Aguarda o carregamento completo do DOM para anexar eventos
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM carregado, anexando eventos...');
+
+            const form = document.getElementById('fareForm');
+            if (form) {
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault(); // Impede recarregamento
+                    calcularTarifa();
+                });
+                console.log('Evento submit anexado ao formulário');
+            } else {
+                console.error('Formulário não encontrado!');
+            }
+
+            // Fallback: também anexa evento de clique ao botão (caso o submit falhe)
+            const button = document.querySelector('button[type="submit"]');
+            if (button) {
+                button.addEventListener('click', function(event) {
+                    // O evento de clique pode ser chamado antes do submit, mas com preventDefault no submit já resolve
+                    // Deixamos como garantia extra
+                });
+            }
+        });
+    </script>
+</body>
+</html>
